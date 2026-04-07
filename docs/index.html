@@ -599,6 +599,41 @@ O simplemente pegar texto normal."></textarea>
         }
       }
     });
+
+    // Auto-load guion from URL param ?guion=BASE64
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const guionParam = params.get('guion');
+      if (!guionParam) return;
+
+      try {
+        const json = decodeURIComponent(escape(atob(guionParam)));
+        const guionArr = JSON.parse(json);
+
+        // Convert guion array (CRM format) to plain text for the textarea
+        let textLines = [];
+        for (const bloque of guionArr) {
+          if (typeof bloque === 'string') {
+            textLines.push(bloque);
+          } else if (bloque.tipo === 'corte') {
+            textLines.push('-- CORTE --');
+          } else {
+            let line = bloque.tipo ? bloque.tipo.toUpperCase() + ': ' + (bloque.texto || '') : (bloque.texto || '');
+            textLines.push(line);
+            if (bloque.nota_direccion) textLines.push('(' + bloque.nota_direccion + ')');
+          }
+        }
+
+        const text = textLines.join('\n');
+        document.getElementById('text-input').value = text;
+        saveText();
+
+        // Auto-start teleprompter
+        setTimeout(() => startTeleprompter(), 100);
+      } catch(e) {
+        console.error('Error parsing guion from URL:', e);
+      }
+    })();
   </script>
 </body>
 </html>
