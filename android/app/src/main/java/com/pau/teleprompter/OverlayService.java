@@ -190,7 +190,7 @@ public class OverlayService extends Service {
         bottomBar.setPadding(dpToPx(16), barPad, dpToPx(16), barPad);
 
         // Toggle (flecha arriba = abierto)
-        toggleBtn = createBarButton("\u25B2", v -> toggleMinimize());
+        toggleBtn = (TextView) createBarButton("\u25B2", v -> toggleMinimize());
         bottomBar.addView(toggleBtn);
         bottomBar.addView(createBarSpacer());
         // Cerrar
