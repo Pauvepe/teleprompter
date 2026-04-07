@@ -168,7 +168,10 @@
     #screen-teleprompter {
       display: none;
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 25vh;
       z-index: 9999;
       flex-direction: column;
     }
@@ -179,8 +182,9 @@
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
-      padding: 24px 24px;
+      padding: 16px 20px;
       position: relative;
+      min-height: 0;
     }
 
     .tp-content::-webkit-scrollbar {
@@ -194,7 +198,7 @@
 
     /* Bloques tipo CRM */
     .tp-block {
-      margin-bottom: 20px;
+      margin-bottom: 14px;
     }
 
     .tp-block-label {
@@ -204,12 +208,12 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       display: block;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
 
     .tp-block-text {
-      font-size: 20px;
-      line-height: 1.65;
+      font-size: 18px;
+      line-height: 1.5;
       color: white;
       font-weight: 500;
       letter-spacing: -0.2px;
@@ -221,10 +225,10 @@
     }
 
     .tp-block-direction {
-      font-size: 12px;
+      font-size: 11px;
       color: rgba(255,255,255,0.4);
       font-style: italic;
-      margin-top: 3px;
+      margin-top: 2px;
     }
 
     /* Cortes */
@@ -232,8 +236,8 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 0;
-      margin-bottom: 20px;
+      padding: 4px 0;
+      margin-bottom: 14px;
     }
 
     .tp-corte-line {
@@ -251,8 +255,8 @@
 
     /* Texto simple (sin bloques) */
     .tp-simple-text {
-      font-size: 20px;
-      line-height: 1.65;
+      font-size: 18px;
+      line-height: 1.5;
       color: white;
       font-weight: 500;
       letter-spacing: -0.2px;
@@ -266,27 +270,26 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: 40px;
-      background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.3));
+      height: 24px;
+      background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4));
       pointer-events: none;
     }
 
-    /* Barra inferior */
+    /* Barra inferior del teleprompter */
     .tp-bottom-bar {
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.9);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 8px 24px;
-      padding-bottom: max(8px, env(safe-area-inset-bottom));
-      gap: 16px;
+      padding: 4px 16px;
+      gap: 12px;
       flex-shrink: 0;
       border-top: 1px solid rgba(255,255,255,0.1);
     }
 
     .tp-bar-btn {
-      width: 44px;
-      height: 44px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       border: none;
       background: rgba(255,255,255,0.1);
@@ -303,17 +306,16 @@
       background: rgba(255,255,255,0.25);
     }
 
-    .tp-bar-btn.active {
-      background: rgba(255,255,255,0.2);
-      color: white;
-    }
-
     .tp-bar-btn svg {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
     }
 
-    /* Minimizado */
+    /* Minimizado: solo la barra, arriba del todo */
+    #screen-teleprompter.minimized {
+      height: auto;
+    }
+
     #screen-teleprompter.minimized .tp-content {
       display: none;
     }
@@ -322,28 +324,15 @@
       display: none;
     }
 
-    #screen-teleprompter.minimized {
-      top: auto;
-      bottom: 0;
-    }
-
     /* Tamaño texto dinámico */
-    .tp-simple-text.size-s, .tp-block-text.size-s { font-size: 16px; }
-    .tp-simple-text.size-m, .tp-block-text.size-m { font-size: 20px; }
-    .tp-simple-text.size-l, .tp-block-text.size-l { font-size: 26px; }
-    .tp-simple-text.size-xl, .tp-block-text.size-xl { font-size: 32px; }
+    .tp-simple-text.size-s, .tp-block-text.size-s { font-size: 14px; }
+    .tp-simple-text.size-m, .tp-block-text.size-m { font-size: 18px; }
+    .tp-simple-text.size-l, .tp-block-text.size-l { font-size: 22px; }
+    .tp-simple-text.size-xl, .tp-block-text.size-xl { font-size: 28px; }
 
     /* Mirror mode */
     .tp-content.mirrored {
       transform: scaleX(-1);
-    }
-
-    /* Spacer top/bottom para scroll cómodo */
-    .tp-spacer-top {
-      height: 30vh;
-    }
-    .tp-spacer-bottom {
-      height: 60vh;
     }
   </style>
 </head>
@@ -394,36 +383,14 @@ O simplemente pegar texto normal."></textarea>
   <!-- PANTALLA TELEPROMPTER -->
   <div id="screen-teleprompter">
     <div class="tp-content" id="tp-content">
-      <div class="tp-spacer-top"></div>
       <div class="tp-text-wrapper" id="tp-text"></div>
-      <div class="tp-spacer-bottom"></div>
       <div class="tp-fade"></div>
     </div>
     <div class="tp-bottom-bar" id="tp-bar">
-      <!-- Scroll arriba -->
-      <button class="tp-bar-btn" onclick="scrollTp(-200)" title="Arriba">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="18 15 12 9 6 15"/>
-        </svg>
-      </button>
-      <!-- Scroll abajo -->
-      <button class="tp-bar-btn" onclick="scrollTp(200)" title="Abajo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
-      </button>
-      <!-- Mirror -->
-      <button class="tp-bar-btn" id="btn-mirror" onclick="toggleMirror()" title="Espejo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 3v18"/>
-          <path d="M8 7l-4 5 4 5"/>
-          <path d="M16 7l4 5-4 5"/>
-        </svg>
-      </button>
-      <!-- Minimizar/Maximizar -->
+      <!-- Toggle abrir/cerrar -->
       <button class="tp-bar-btn" id="btn-toggle" onclick="toggleMinimize()" title="Minimizar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"/>
+          <polyline points="18 15 12 9 6 15"/>
         </svg>
       </button>
       <!-- Cerrar -->
@@ -575,48 +542,30 @@ O simplemente pegar texto normal."></textarea>
       content.style.background = `rgba(0, 0, 0, ${opacity / 100})`;
       content.scrollTop = 0;
 
-      // Fullscreen en mobile
-      try {
-        if (document.documentElement.requestFullscreen) {
-          document.documentElement.requestFullscreen();
-        } else if (document.documentElement.webkitRequestFullscreen) {
-          document.documentElement.webkitRequestFullscreen();
-        }
-      } catch(e) {}
+      updateToggleIcon();
     }
 
     function closeTeleprompter() {
       document.getElementById('screen-teleprompter').style.display = 'none';
       document.getElementById('screen-home').style.display = 'flex';
-      try {
-        if (document.fullscreenElement) document.exitFullscreen();
-        else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
-      } catch(e) {}
-    }
-
-    function scrollTp(amount) {
-      const content = document.getElementById('tp-content');
-      content.scrollBy({ top: amount, behavior: 'smooth' });
     }
 
     function toggleMinimize() {
       const tp = document.getElementById('screen-teleprompter');
       isMinimized = !isMinimized;
       tp.classList.toggle('minimized', isMinimized);
-
-      const btn = document.getElementById('btn-toggle');
-      if (isMinimized) {
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 15 12 9 18 15"/></svg>';
-      } else {
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
-      }
+      updateToggleIcon();
     }
 
-    function toggleMirror() {
-      isMirrored = !isMirrored;
-      const content = document.getElementById('tp-content');
-      content.classList.toggle('mirrored', isMirrored);
-      document.getElementById('btn-mirror').classList.toggle('active', isMirrored);
+    function updateToggleIcon() {
+      const btn = document.getElementById('btn-toggle');
+      if (isMinimized) {
+        // Cerrado → flecha abajo (abrir)
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+      } else {
+        // Abierto → flecha arriba (cerrar)
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
+      }
     }
 
     // Register service worker
