@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#111111">
+  <title>Teleprompter</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #111;
+      color: white;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ===== PANTALLA INICIO ===== */
+    #screen-home {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: #111;
+    }
+
+    .home-header {
+      padding: 20px 24px 12px;
+      flex-shrink: 0;
+    }
+
+    .home-header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+
+    .home-header p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 4px;
+    }
+
+    .text-area-wrapper {
+      flex: 1;
+      padding: 0 24px 12px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    #text-input {
+      flex: 1;
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 20px;
+      color: white;
+      font-size: 16px;
+      line-height: 1.6;
+      resize: none;
+      outline: none;
+      font-family: inherit;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #text-input::placeholder {
+      color: rgba(255,255,255,0.25);
+    }
+
+    #text-input:focus {
+      border-color: rgba(255,255,255,0.25);
+    }
+
+    .home-bottom {
+      padding: 12px 24px 24px;
+      flex-shrink: 0;
+    }
+
+    .settings-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .setting-item {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .setting-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.4);
+      font-weight: 600;
+    }
+
+    .setting-value {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .setting-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.7);
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .setting-btn:active {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .setting-number {
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+      min-width: 36px;
+      text-align: center;
+    }
+
+    .btn-start {
+      width: 100%;
+      height: 56px;
+      border-radius: 16px;
+      border: none;
+      background: white;
+      color: #111;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: -0.3px;
+      touch-action: manipulation;
+      transition: opacity 0.15s;
+    }
+
+    .btn-start:active {
+      opacity: 0.8;
+    }
+
+    /* ===== PANTALLA TELEPROMPTER ===== */
+    #screen-teleprompter {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      flex-direction: column;
+    }
+
+    .tp-content {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.70);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      padding: 24px 24px;
+      position: relative;
+    }
+
+    .tp-content::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tp-text-wrapper {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Bloques tipo CRM */
+    .tp-block {
+      margin-bottom: 20px;
+    }
+
+    .tp-block-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .tp-block-text {
+      font-size: 20px;
+      line-height: 1.65;
+      color: white;
+      font-weight: 500;
+      letter-spacing: -0.2px;
+    }
+
+    .tp-block-text strong {
+      font-weight: 700;
+      color: white;
+    }
+
+    .tp-block-direction {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      font-style: italic;
+      margin-top: 3px;
+    }
+
+    /* Cortes */
+    .tp-corte {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      margin-bottom: 20px;
+    }
+
+    .tp-corte-line {
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.3);
+    }
+
+    .tp-corte-text {
+      font-size: 10px;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* Texto simple (sin bloques) */
+    .tp-simple-text {
+      font-size: 20px;
+      line-height: 1.65;
+      color: white;
+      font-weight: 500;
+      letter-spacing: -0.2px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    /* Fade gradient bottom */
+    .tp-fade {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.3));
+      pointer-events: none;
+    }
+
+    /* Barra inferior */
+    .tp-bottom-bar {
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 24px;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+      gap: 16px;
+      flex-shrink: 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .tp-bar-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: background 0.15s;
+    }
+
+    .tp-bar-btn:active {
+      background: rgba(255,255,255,0.25);
+    }
+
+    .tp-bar-btn.active {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    .tp-bar-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Minimizado */
+    #screen-teleprompter.minimized .tp-content {
+      display: none;
+    }
+
+    #screen-teleprompter.minimized .tp-fade {
+      display: none;
+    }
+
+    #screen-teleprompter.minimized {
+      top: auto;
+      bottom: 0;
+    }
+
+    /* Tamaño texto dinámico */
+    .tp-simple-text.size-s, .tp-block-text.size-s { font-size: 16px; }
+    .tp-simple-text.size-m, .tp-block-text.size-m { font-size: 20px; }
+    .tp-simple-text.size-l, .tp-block-text.size-l { font-size: 26px; }
+    .tp-simple-text.size-xl, .tp-block-text.size-xl { font-size: 32px; }
+
+    /* Mirror mode */
+    .tp-content.mirrored {
+      transform: scaleX(-1);
+    }
+
+    /* Spacer top/bottom para scroll cómodo */
+    .tp-spacer-top {
+      height: 30vh;
+    }
+    .tp-spacer-bottom {
+      height: 60vh;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PANTALLA INICIO -->
+  <div id="screen-home">
+    <div class="home-header">
+      <h1>Teleprompter</h1>
+      <p>Pega tu guion y dale a empezar</p>
+    </div>
+
+    <div class="text-area-wrapper">
+      <textarea id="text-input" placeholder="Escribe o pega tu texto aqui...
+
+Puedes usar formato de bloques:
+HOOK: Tu hook aqui
+DICE: Lo que dices
+-- CORTE --
+CTA: Call to action
+
+O simplemente pegar texto normal."></textarea>
+    </div>
+
+    <div class="home-bottom">
+      <div class="settings-row">
+        <div class="setting-item">
+          <span class="setting-label">Tamano</span>
+          <div class="setting-value">
+            <button class="setting-btn" onclick="changeSize(-1)">-</button>
+            <span class="setting-number" id="size-label">M</span>
+            <button class="setting-btn" onclick="changeSize(1)">+</button>
+          </div>
+        </div>
+        <div class="setting-item">
+          <span class="setting-label">Opacidad</span>
+          <div class="setting-value">
+            <button class="setting-btn" onclick="changeOpacity(-10)">-</button>
+            <span class="setting-number" id="opacity-label">70%</span>
+            <button class="setting-btn" onclick="changeOpacity(10)">+</button>
+          </div>
+        </div>
+      </div>
+      <button class="btn-start" onclick="startTeleprompter()">Empezar</button>
+    </div>
+  </div>
+
+  <!-- PANTALLA TELEPROMPTER -->
+  <div id="screen-teleprompter">
+    <div class="tp-content" id="tp-content">
+      <div class="tp-spacer-top"></div>
+      <div class="tp-text-wrapper" id="tp-text"></div>
+      <div class="tp-spacer-bottom"></div>
+      <div class="tp-fade"></div>
+    </div>
+    <div class="tp-bottom-bar" id="tp-bar">
+      <!-- Scroll arriba -->
+      <button class="tp-bar-btn" onclick="scrollTp(-200)" title="Arriba">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="18 15 12 9 6 15"/>
+        </svg>
+      </button>
+      <!-- Scroll abajo -->
+      <button class="tp-bar-btn" onclick="scrollTp(200)" title="Abajo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <!-- Mirror -->
+      <button class="tp-bar-btn" id="btn-mirror" onclick="toggleMirror()" title="Espejo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v18"/>
+          <path d="M8 7l-4 5 4 5"/>
+          <path d="M16 7l4 5-4 5"/>
+        </svg>
+      </button>
+      <!-- Minimizar/Maximizar -->
+      <button class="tp-bar-btn" id="btn-toggle" onclick="toggleMinimize()" title="Minimizar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <!-- Cerrar -->
+      <button class="tp-bar-btn" onclick="closeTeleprompter()" title="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Estado
+    let textSize = 1; // 0=S, 1=M, 2=L, 3=XL
+    const sizes = ['s', 'm', 'l', 'xl'];
+    const sizeLabels = ['S', 'M', 'L', 'XL'];
+    let opacity = 70;
+    let isMinimized = false;
+    let isMirrored = false;
+
+    // Guardar/cargar texto
+    function saveText() {
+      try { localStorage.setItem('tp_text', document.getElementById('text-input').value); } catch(e) {}
+    }
+    function loadText() {
+      try {
+        const saved = localStorage.getItem('tp_text');
+        if (saved) document.getElementById('text-input').value = saved;
+      } catch(e) {}
+    }
+    document.getElementById('text-input').addEventListener('input', saveText);
+    loadText();
+
+    // Settings
+    function changeSize(dir) {
+      textSize = Math.max(0, Math.min(3, textSize + dir));
+      document.getElementById('size-label').textContent = sizeLabels[textSize];
+      // Update live if teleprompter is open
+      document.querySelectorAll('.tp-simple-text, .tp-block-text').forEach(el => {
+        el.className = el.className.replace(/size-\w+/, '') + ' size-' + sizes[textSize];
+      });
+    }
+
+    function changeOpacity(dir) {
+      opacity = Math.max(30, Math.min(100, opacity + dir));
+      document.getElementById('opacity-label').textContent = opacity + '%';
+      const content = document.getElementById('tp-content');
+      if (content) content.style.background = `rgba(0, 0, 0, ${opacity / 100})`;
+    }
+
+    // Parse texto
+    function parseText(raw) {
+      const lines = raw.split('\n');
+      const blocks = [];
+      let currentText = [];
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+
+        // Corte
+        if (trimmed === '-- CORTE --' || trimmed === '--CORTE--' || trimmed.toLowerCase() === 'corte') {
+          if (currentText.length > 0) {
+            blocks.push({ type: 'text', content: currentText.join('\n') });
+            currentText = [];
+          }
+          blocks.push({ type: 'corte' });
+          continue;
+        }
+
+        // Bloque con label (HOOK:, DICE:, CTA:, etc.)
+        const match = trimmed.match(/^(HOOK|DICE|CTA|INTRO|CIERRE|PREGUNTA|DATO|EJEMPLO|TRANSICION):?\s*(.*)/i);
+        if (match) {
+          if (currentText.length > 0) {
+            blocks.push({ type: 'text', content: currentText.join('\n') });
+            currentText = [];
+          }
+          blocks.push({ type: 'block', label: match[1].toUpperCase(), content: match[2] });
+          continue;
+        }
+
+        // Nota de dirección
+        if (trimmed.startsWith('(') && trimmed.endsWith(')') && blocks.length > 0) {
+          const lastBlock = blocks[blocks.length - 1];
+          if (lastBlock.type === 'block') {
+            lastBlock.direction = trimmed.slice(1, -1);
+            continue;
+          }
+        }
+
+        currentText.push(line);
+      }
+
+      if (currentText.length > 0) {
+        blocks.push({ type: 'text', content: currentText.join('\n') });
+      }
+
+      return blocks;
+    }
+
+    function formatBold(text) {
+      return text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    }
+
+    function renderBlocks(blocks) {
+      const container = document.getElementById('tp-text');
+      container.innerHTML = '';
+      const sizeClass = 'size-' + sizes[textSize];
+
+      for (const block of blocks) {
+        if (block.type === 'corte') {
+          const div = document.createElement('div');
+          div.className = 'tp-corte';
+          div.innerHTML = '<div class="tp-corte-line"></div><span class="tp-corte-text">corte</span><div class="tp-corte-line"></div>';
+          container.appendChild(div);
+        } else if (block.type === 'block') {
+          const div = document.createElement('div');
+          div.className = 'tp-block';
+          let html = `<span class="tp-block-label">${block.label}</span>`;
+          html += `<p class="tp-block-text ${sizeClass}">${formatBold(block.content)}</p>`;
+          if (block.direction) {
+            html += `<p class="tp-block-direction">(${block.direction})</p>`;
+          }
+          div.innerHTML = html;
+          container.appendChild(div);
+        } else {
+          const div = document.createElement('div');
+          div.className = 'tp-block';
+          div.innerHTML = `<p class="tp-simple-text ${sizeClass}">${formatBold(block.content.replace(/\n/g, '<br>'))}</p>`;
+          container.appendChild(div);
+        }
+      }
+    }
+
+    // Teleprompter controls
+    function startTeleprompter() {
+      const raw = document.getElementById('text-input').value.trim();
+      if (!raw) return;
+
+      const blocks = parseText(raw);
+      renderBlocks(blocks);
+
+      document.getElementById('screen-home').style.display = 'none';
+      const tp = document.getElementById('screen-teleprompter');
+      tp.style.display = 'flex';
+      tp.classList.remove('minimized');
+      isMinimized = false;
+
+      const content = document.getElementById('tp-content');
+      content.style.background = `rgba(0, 0, 0, ${opacity / 100})`;
+      content.scrollTop = 0;
+
+      // Fullscreen en mobile
+      try {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        } else if (document.documentElement.webkitRequestFullscreen) {
+          document.documentElement.webkitRequestFullscreen();
+        }
+      } catch(e) {}
+    }
+
+    function closeTeleprompter() {
+      document.getElementById('screen-teleprompter').style.display = 'none';
+      document.getElementById('screen-home').style.display = 'flex';
+      try {
+        if (document.fullscreenElement) document.exitFullscreen();
+        else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
+      } catch(e) {}
+    }
+
+    function scrollTp(amount) {
+      const content = document.getElementById('tp-content');
+      content.scrollBy({ top: amount, behavior: 'smooth' });
+    }
+
+    function toggleMinimize() {
+      const tp = document.getElementById('screen-teleprompter');
+      isMinimized = !isMinimized;
+      tp.classList.toggle('minimized', isMinimized);
+
+      const btn = document.getElementById('btn-toggle');
+      if (isMinimized) {
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 15 12 9 18 15"/></svg>';
+      } else {
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+      }
+    }
+
+    function toggleMirror() {
+      isMirrored = !isMirrored;
+      const content = document.getElementById('tp-content');
+      content.classList.toggle('mirrored', isMirrored);
+      document.getElementById('btn-mirror').classList.toggle('active', isMirrored);
+    }
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+
+    // Keep screen awake
+    let wakeLock = null;
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch(e) {}
+    }
+    requestWakeLock();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') requestWakeLock();
+    });
+
+    // Volume buttons scroll (captures volume key events when focused)
+    document.addEventListener('keydown', (e) => {
+      if (document.getElementById('screen-teleprompter').style.display === 'flex') {
+        if (e.key === 'ArrowDown' || e.key === 'VolumeDown') {
+          e.preventDefault();
+          scrollTp(150);
+        } else if (e.key === 'ArrowUp' || e.key === 'VolumeUp') {
+          e.preventDefault();
+          scrollTp(-150);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

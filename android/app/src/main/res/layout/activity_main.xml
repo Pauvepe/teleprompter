@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FF111111"
+    android:fitsSystemWindows="true">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Teleprompter"
+            android:textColor="#FFFFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:letterSpacing="-0.02"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pega tu guion y dale a empezar"
+            android:textColor="#66FFFFFF"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp"/>
+    </LinearLayout>
+
+    <!-- Text input -->
+    <EditText
+        android:id="@+id/text_input"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/input_bg"
+        android:padding="20dp"
+        android:gravity="top"
+        android:textColor="#FFFFFFFF"
+        android:textSize="16sp"
+        android:lineSpacingMultiplier="1.4"
+        android:hint="Escribe o pega tu texto aqui...\n\nPuedes usar formato:\nHOOK: Tu hook\nDICE: Lo que dices\n-- CORTE --\nCTA: Call to action"
+        android:textColorHint="#40FFFFFF"
+        android:inputType="textMultiLine"
+        android:scrollbars="vertical"/>
+
+    <!-- Settings -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="24dp">
+
+        <!-- Size -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="TAMANO"
+                android:textColor="#66FFFFFF"
+                android:textSize="10sp"
+                android:letterSpacing="0.1"
+                android:textStyle="bold"/>
+
+            <SeekBar
+                android:id="@+id/size_seekbar"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
+                android:progressTint="#FFFFFF"
+                android:thumbTint="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/size_label"
+                android:layout_width="32dp"
+                android:layout_height="wrap_content"
+                android:text="M"
+                android:textColor="#FFFFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:gravity="center"/>
+        </LinearLayout>
+
+        <!-- Opacity -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="OPACIDAD"
+                android:textColor="#66FFFFFF"
+                android:textSize="10sp"
+                android:letterSpacing="0.1"
+                android:textStyle="bold"/>
+
+            <SeekBar
+                android:id="@+id/opacity_seekbar"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
+                android:progressTint="#FFFFFF"
+                android:thumbTint="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/opacity_label"
+                android:layout_width="42dp"
+                android:layout_height="wrap_content"
+                android:text="70%"
+                android:textColor="#FFFFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:gravity="center"/>
+        </LinearLayout>
+
+        <!-- Start button -->
+        <Button
+            android:id="@+id/btn_start"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Empezar"
+            android:textColor="#FF111111"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            android:backgroundTint="#FFFFFFFF"
+            android:letterSpacing="-0.01"/>
+    </LinearLayout>
+
+</LinearLayout>
