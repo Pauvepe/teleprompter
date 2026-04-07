@@ -6,13 +6,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.net.URLDecoder;
 
 public class MainActivity extends Activity {
 
@@ -67,6 +66,71 @@ public class MainActivity extends Activity {
         });
 
         btnStart.setOnClickListener(v -> startOverlay());
+
+        // Deep link: crm-teleprompter://open?data=BASE64_GUION
+        handleDeepLink(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleDeepLink(intent);
+    }
+
+    private void handleDeepLink(Intent intent) {
+        if (intent == null || intent.getData() == null) return;
+        Uri uri = intent.getData();
+        if (!"crm-teleprompter".equals(uri.getScheme())) return;
+
+        String dataB64 = uri.getQueryParameter("data");
+        if (dataB64 == null || dataB64.isEmpty()) return;
+
+        try {
+            // Decode base64 → JSON array of guion blocks → plain text
+            byte[] decoded = android.util.Base64.decode(dataB64, android.util.Base64.DEFAULT);
+            String json = new String(decoded, "UTF-8");
+            // Parse JSON array manually (avoid dependency on org.json for simple case)
+            String plainText = guionJsonToText(json);
+
+            textInput.setText(plainText);
+            getSharedPreferences("tp", MODE_PRIVATE).edit().putString("text", plainText).apply();
+
+            // Auto-launch overlay
+            startOverlay();
+        } catch (Exception e) {
+            Toast.makeText(this, "Error al leer guion", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private String guionJsonToText(String json) {
+        // Simple parser for guion JSON array
+        // Handles: ["HOOK: text", "-- CORTE --", {"tipo":"dice","texto":"text","nota_direccion":"note"}]
+        StringBuilder sb = new StringBuilder();
+        try {
+            org.json.JSONArray arr = new org.json.JSONArray(json);
+            for (int i = 0; i < arr.length(); i++) {
+                Object item = arr.get(i);
+                if (item instanceof String) {
+                    sb.append((String) item).append("\n");
+                } else if (item instanceof org.json.JSONObject) {
+                    org.json.JSONObject obj = (org.json.JSONObject) item;
+                    String tipo = obj.optString("tipo", "");
+                    String texto = obj.optString("texto", "");
+                    if ("corte".equalsIgnoreCase(tipo)) {
+                        sb.append("-- CORTE --\n");
+                    } else {
+                        if (!tipo.isEmpty()) sb.append(tipo.toUpperCase()).append(": ");
+                        sb.append(texto).append("\n");
+                    }
+                    String nota = obj.optString("nota_direccion", "");
+                    if (!nota.isEmpty()) sb.append("(").append(nota).append(")\n");
+                }
+            }
+        } catch (Exception e) {
+            // If not valid JSON array, use as plain text
+            sb.append(json);
+        }
+        return sb.toString().trim();
     }
 
     private void startOverlay() {
