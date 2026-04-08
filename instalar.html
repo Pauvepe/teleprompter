@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111111">
+  <title>Instalar Teleprompter</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #111;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 24px;
+    }
+    .logo {
+      width: 80px; height: 80px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      margin-bottom: 24px;
+    }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; text-align: center; }
+    .subtitle { font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 32px; text-align: center; }
+    .download-btn {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; max-width: 340px;
+      height: 56px;
+      background: white; color: #111;
+      border-radius: 16px; border: none;
+      font-size: 17px; font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      margin-bottom: 32px;
+    }
+    .download-btn:active { opacity: 0.8; }
+    .download-btn svg { width: 22px; height: 22px; }
+    .steps { width: 100%; max-width: 340px; }
+    .step {
+      display: flex; gap: 14px;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      width: 28px; height: 28px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-text { font-size: 14px; line-height: 1.5; color: rgba(255,255,255,0.8); }
+    .step-text strong { color: white; }
+    .note {
+      margin-top: 24px;
+      padding: 16px;
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 12px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.5;
+      max-width: 340px;
+      width: 100%;
+    }
+    .note strong { color: rgba(59,130,246,0.9); }
+    .web-link {
+      margin-top: 24px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+    }
+    .web-link a { color: rgba(59,130,246,0.7); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="logo">📖</div>
+  <h1>Teleprompter</h1>
+  <p class="subtitle">Guion flotante encima de cualquier app</p>
+
+  <a class="download-btn" href="teleprompter.apk" download="teleprompter.apk" id="download-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    Descargar app
+  </a>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Toca <strong>Descargar app</strong> y espera a que baje (5 MB)</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Abre el archivo descargado. Si pide permiso de <strong>"fuentes desconocidas"</strong>, activa el toggle y vuelve atras</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">Toca <strong>Instalar</strong>. La primera vez te pedira permiso para mostrar encima de otras apps — <strong>acepta</strong></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text">Listo. Vuelve al CRM y toca <strong>Modo Libre</strong> — el guion aparecera flotando</div>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>Solo la primera vez.</strong> Una vez instalada, "Modo Libre" abrira la app directamente con el guion de cada video.
+  </div>
+
+  <p class="web-link">Mientras tanto puedes usar la <a href="index.html">version web</a></p>
+
+  <script>
+    // If there's a guion param, save it so after install the user can retry
+    const params = new URLSearchParams(window.location.search);
+    const guion = params.get('guion');
+    if (guion) {
+      try { localStorage.setItem('pending_guion', guion); } catch(e) {}
+    }
+  </script>
+</body>
+</html>
